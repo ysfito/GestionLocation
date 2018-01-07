@@ -1,0 +1,100 @@
+ class bien {
+        var $nom;
+        var $addresseB;
+        var $montant;
+        var $commission;
+        var $etat;
+        var $idtypeBien;
+        
+//ad bien et proprio s'il n'existe pas
+        function addBien($numPiece){
+
+                        Propietaire::$this->getConnexion();
+
+              //on fait appel a la fonction findPropietaire de la class propietaire
+                         $trouv = Propietaire::findPropietaire($numPiece);
+                        //le propietaire existe,on enregistre ses biens
+                            if ($trouv==1){
+                                    $sql="INSERT INTO BIEN (idBien,nomBien,adresseBien,montantloc,Commission,idtypeBien,idPropietaire,EtatBien) VALUES (NULL , :nom, :addresseBien,:montant,  :commission,NULL ,NULL , :etat)";
+                                $req=$this->bdd->prepare($sql);
+                                $donnee=$req->execute(array(
+                                    'nom'=> $this->nom,
+                                    'addresseBien'=>$this->addresseB,
+                                    'montant'=>$this-> montant,
+                                    'commission'=> $this->commission,
+                                    'etat'=>$this->etat
+                                ));
+                                        }
+                            //le propietaire n'existe pas ,on l'enregistre avec ses biens
+                        if ($trouv==0)
+                                {  //on fait appel la fonction addPropietaire de la class propietaire
+                                    Propietaire::addPropietaire($numPiece);
+
+                                    $sql="INSERT INTO BIEN (idBien,nomBien,adresseBien,montantloc,Commission,idtypeBien,idPropietaire,EtatBien) VALUES (NULL , :nom, :addresseBien,:montant,  :commission,NULL ,NULL , :etat)";
+                                    $req=$this->bdd->prepare($sql);
+                                    $donnee=$req->execute(array(
+                                        'nom'=> $this->nom,
+                                        'addresseBien'=>$this->addresseB,
+                                        'montant'=>$this-> montant,
+                                        'commission'=> $this->commission,
+                                        'etat'=>$this->etat
+                                    ));
+                                }
+            return $donnee;
+                           }
+//mise a jour des biens d'un proprio
+            function UpdateBien($nom, $addresseB, $montant, $commission, $etat){
+                        Propietaire::$this->getConnexion();
+
+                        $sql="UPDATE BIEN SET (nomBien='$nom',adresseBien='$addresseB',montantloc='$montant',Commission='$commission',EtatBien='$etat') WHERE ( Propietaire::findPropietaire($numPiece)==1)";
+                        $req=$this->bdd->prepare($sql);
+                        $donnee=$req->execute(array(
+                            'nom'=> $this->nom,
+                            'addresseBien'=>$this->addresseB,
+                            'montant'=>$this->montant,
+                            'commission'=> $this->commission,
+                            'etat'=>$this->etat
+                        ));
+                        return $donnee;
+                          }
+//retrouver un bien par son nom
+             function findBien($nom){
+                    Propietaire::$this->getConnexion();
+                 $sql="SELECT (idBien,nomBien,adresseBien,montantloc,Commission,idtypeBien,idPropietaire,EtatBien) FROM  Bien  WHERE nomBien=='$nom' " ;
+                 $req=$this->bdd->query($sql);
+                 return $req;
+                }
+ //retourner la liste des biens
+            function listerBien(){
+                Propietaire::$this->getConnexion();
+                $sql="SELECT * FROM  Bien " ;
+                $req=$this->bdd->query($sql);
+                return $req;
+            }
+
+ //retourner les biens d'un type donne
+           function listerByType($idtypeBien){
+               Propietaire::$this->getConnexion();
+               $sql="SELECT (idBien,nomBien,adresseBien,montantloc,Commission,idPropietaire,EtatBien) FROM  Bien  WHERE idtypeBien=='$idtypeBien' " ;
+               $req=$this->bdd->query($sql);
+               return $req;
+           }
+    //lister les biens dispo ou non en fonction des etats 1 ou 0
+           function listerByEtat(){
+               Propietaire::$this->getConnexion();
+               $exist=0;
+               $sql="SELECT EtatBien FROM  Bien WHERE EtatBien==1" ;
+               $req=$this->bdd->query($sql);
+               while($donee=$req->fetch()){
+                   $exist=1;
+                   break;
+                }
+                if($exist=1){ 
+                       echo $donee; 
+                     }
+                else {
+                    echo 'il n\'y a pas de bien disponible' ;
+                }
+                }
+           }
+        }
